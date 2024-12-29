@@ -1,0 +1,131 @@
+.login-container {
+    width: 100%;
+    max-width: 450px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: #fff;
+    box-shadow: 0 6px 18px var(--box-shadow);
+    font-family: 'Arial', sans-serif;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover effect on container */
+.login-container:hover {
+    transform: scale(1.02);
+    box-shadow: 0 8px 25px var(--box-shadow-hover);
+}
+
+/* Title */
+.login-container h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: var(--text-color);
+    font-size: 2rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* Form group */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--label-color);
+    font-size: 0.9rem;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+/* Input icon wrapper */
+.input-icon-wrapper {
+    position: relative;
+}
+
+.input-icon-wrapper .icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--label-color);
+}
+
+/* Input styles */
+.form-group input {
+    width: 100%;
+    padding: 12px 12px 12px 36px; /* Adjust padding to make space for the icon */
+    border: 1px solid var(--input-border-color);
+    border-radius: 6px;
+    font-size: 1rem;
+    background-color: var(--input-bg-color);
+    color: var(--text-color);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Focus effect on inputs */
+.form-group input:focus {
+    border-color: var(--input-focus-border-color);
+    box-shadow: 0 0 8px var(--box-shadow);
+    outline: none;
+}
+
+/* Button styles */
+.btn {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--btn-bg-color);
+    color: white;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover and transform effects on button */
+.btn:hover {
+    background-color: var(--btn-hover-bg-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px var(--box-shadow);
+}
+
+/* Active effect on button */
+.btn:active {
+    background-color: var(--btn-hover-bg-color);
+    transform: translateY(0);
+    box-shadow: var(--box-shadow-active);
+}
+
+/* Toast notifications */
+.Toastify__toast-container {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 9999;
+}
+
+/* Responsive design for mobile devices */
+@media (max-width: 480px) {
+    .register-container {
+        padding: 20px;
+        
+    }
+
+    .register-container h1 {
+        font-size: 1.5rem;
+    }
+
+    .form-group input {
+        font-size: 1rem;
+    }
+
+    .btn {
+        font-size: 1rem;
+        padding: 10px;
+    }
+}

@@ -1,0 +1,144 @@
+/* Navbar.css */
+
+/* Estilos básicos del navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #333;
+  padding: 10px 20px;
+  position: relative;
+}
+
+.navbar-logo a {
+  color: white;
+  text-decoration: none;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Menú de navegación */
+.navbar-content {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.navbar-menu {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.navbar-menu li {
+  margin-left: 20px;
+}
+
+.navbar-menu li a {
+  color: white;
+  text-decoration: none;
+  font-size: 1rem;
+  padding: 8px 16px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.navbar-menu li a:hover {
+  background-color: #555;
+}
+
+/* Estilo del botón de logout */
+.logout-button {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+  width: 100%;
+  text-align: left;
+}
+
+.logout-button:hover {
+  background-color: #d32f2f;
+}
+
+/* Estilos para el botón de menú en dispositivos pequeños */
+.menu-toggle {
+  display: none;
+  background-color: #333;
+  color: white;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 50%;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.menu-icon {
+  font-size: 24px;
+  color: white;
+}
+
+/* Estilos para mostrar el menú en dispositivos pequeños */
+.navbar-content.show .navbar-menu {
+  display: block;
+}
+
+.navbar-content.show .menu-toggle {
+  display: block;
+}
+
+/* Estilos para el menú desplegable en dispositivos pequeños */
+.navbar-menu {
+  display: flex;
+  flex-direction: column;
+  background-color: #333;
+  position: absolute;
+  top: 60px;
+  right: 0;
+  width: 100%;
+  padding: 10px;
+  display: none;
+}
+
+/* Añadir margen al final del menú */
+.navbar-menu li:last-child {
+  margin-bottom: 10px;
+}
+
+/* Media query para dispositivos móviles */
+@media (max-width: 768px) {
+  .navbar-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .menu-toggle {
+    display: block;
+  }
+
+  .navbar-menu {
+    display: none;
+    width: 100%;
+  }
+
+  .navbar-content.show .navbar-menu {
+    display: block;
+  }
+
+  .navbar-menu li {
+    margin: 10px 0;
+  }
+
+  .logout-button {
+    margin-top: 10px;
+    width: 100%; /* Asegura que el botón de logout ocupe todo el ancho */
+  }
+}
