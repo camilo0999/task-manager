@@ -191,7 +191,7 @@ const Dashboard = () => {
               key={task.id}
             >
               <img
-                src={`http://localhost:5000${task.imageUrl}`}
+                src={`https://task-manager-api-uzzf.onrender.com${task.imageUrl}`}
                 alt="Task Image"
                 className="w-full h-40 object-cover rounded-t-lg"
               />

@@ -93,7 +93,7 @@ const GetTask = () => {
         </h1>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
           <img
-            src={`http://localhost:5000${task.imageUrl}`}
+            src={`https://task-manager-api-uzzf.onrender.com${task.imageUrl}`}
             alt="Task Image"
             className="rounded-lg shadow-md w-full h-auto"
           />
