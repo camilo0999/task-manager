@@ -66,7 +66,7 @@
     transition: 0.3s ease-in-out;
 }
 
-.banner button {
+.banner a {
     margin-top: 30px;
     padding: 10px 20px;
     font-size: 1.2rem;
@@ -79,11 +79,47 @@
     transition: all 0.3s ease-in-out;
 }
 
-.banner button:hover {
+.banner a:hover {
     background-color: #535353;
     color: #fff;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
 }
+.video {
+   
+    background-color: #f2f2f2;
+}
+.video h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: bold;
+
+}
+
+.video p {
+    font-size: 1.25rem;
+    color: #666;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.video-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    background-color: #f2f2f2;
+  }
+  
+  .video-container video {
+    max-width: 100%;
+    height: auto;
+    margin-top: 40px;
+    text-align: center;
+  }
+  
+  
 
 /* Responsive */
 @media (max-width: 768px) {
@@ -102,6 +138,13 @@
     .banner button {
         font-size: 1rem;
         padding: 8px 16px;
+    }
+    .video h2 {
+        font-size: 1.5rem;
+    }
+
+    .video p {
+        font-size: 1rem;
     }
 }
 
@@ -126,6 +169,13 @@
     .banner button {
         font-size: 0.9rem;
         padding: 6px 12px;
+    }
+    .video h2 {
+        font-size: 1.2rem;
+    }
+
+    .video p {
+        font-size: 0.9rem;
     }
 }
 

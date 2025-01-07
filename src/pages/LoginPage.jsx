@@ -1,9 +1,8 @@
 import React, { useState } from "react";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from "react-router-dom";
 import "../styles/LoginPage.css";
 import authService from "../services/authService";
+import Swal from 'sweetalert2';
 
 const LoginPage = () => {
     const [username, setUsername] = useState("");
@@ -15,8 +14,13 @@ const LoginPage = () => {
         const credentials = { username, password };
         try {
             const response = await authService.login(credentials);
-            toast.success('Inicio de sesión exitoso!');
-            
+            Swal.fire({
+                icon: 'success',
+                title: 'Inicio de sesión exitoso!',
+                showConfirmButton: false,
+                timer: 1500
+            });
+
             // Almacenar el rol del usuario en el localStorage
             localStorage.setItem('role', response.role);
 
@@ -29,14 +33,17 @@ const LoginPage = () => {
                 navigate("/");
             }
         } catch (error) {
-            toast.error(error.response ? error.response.data : error.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al iniciar sesion',
+                text: 'Credenciales incorrectas',
+            });
             console.error("Error iniciando sesión:", error.response ? error.response.data : error.message);
         }
     };
 
     return (
         <div className="login-container bg-light">
-            <ToastContainer />
             <h1>Iniciar Sesión</h1>
             <form onSubmit={handleSubmit}>
                 <div className="form-group">

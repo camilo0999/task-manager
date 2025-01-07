@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import taskService from "../services/taskService";
+import Swal from "sweetalert2";
 
 const GetTask = () => {
   const [task, setTask] = useState(null);
@@ -29,6 +30,43 @@ const GetTask = () => {
     return colors[priority] || "text-gray-700";
   };
 
+  const completeTask = async () => {
+    try {
+      const result = await Swal.fire({
+        title: "¿Estás seguro?",
+        text: "¡Estás a punto de completar esta tarea!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Sí, completar tarea",
+        cancelButtonText: "Cancelar",
+      });
+
+      if (result.isConfirmed) {
+        const response = await taskService.completeTask(id);
+        setTask(response);
+        Swal.fire({
+          icon: "success",
+          title: "Tarea completada",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      }
+    } catch (error) {
+      console.error(
+        "Error completing task:",
+        error.response ? error.response.data : error.message
+      );
+      setError("Error completing task. Please try again.");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.response ? error.response.data : error.message,
+      });
+    }
+  };
+
   if (error) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -50,22 +88,26 @@ const GetTask = () => {
   return (
     <div className="container mx-auto p-8">
       <div className="bg-white shadow-lg rounded-lg p-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">{task.title}</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+          {task.title}
+        </h1>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
           <img
-            src="https://cdn.mises.org/styles/responsive_4_3_870w/s3/static-page/img/market1_1.jpg.webp?itok=niN_I7wY"
-            alt="Task illustration"
+            src={`http://localhost:5000${task.imageUrl}`}
+            alt="Task Image"
             className="rounded-lg shadow-md w-full h-auto"
           />
           <div>
             <div className="mb-4">
               <p className="text-gray-700 text-lg">
-                <span className="font-semibold">Description:</span> {task.description || "No description"}
+                <span className="font-semibold">Description:</span>{" "}
+                {task.description || "No description"}
               </p>
             </div>
             <div className="mb-4">
               <p className="text-gray-700 text-lg">
-                <span className="font-semibold">Due Date:</span> {new Date(task.dueDate).toLocaleDateString()}
+                <span className="font-semibold">Due Date:</span>{" "}
+                {new Date(task.dueDate).toLocaleDateString()}
               </p>
             </div>
             <div className="mb-4">
@@ -83,15 +125,17 @@ const GetTask = () => {
             </div>
             <div className="mb-6">
               <p className="text-gray-700 text-lg">
-                <span className="font-semibold">Completed:</span> {task.completed ? "Yes" : "No"}
+                <span className="font-semibold">Completed:</span>{" "}
+                {task.completed ? "Si" : "No"}
               </p>
             </div>
             {!task.completed && (
-              <a href="#" className="block">
-                <button className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded">
-                  Complete Task
-                </button>
-              </a>
+              <button
+                onClick={completeTask}
+                className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded"
+              >
+                Complete Task
+              </button>
             )}
           </div>
         </div>

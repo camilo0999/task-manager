@@ -25,7 +25,11 @@ const authService = {
           'Content-Type': 'application/json',
         },
       });
-      const { token, role, username } = response.data; 
+      const { token, role, username, name, lastname, telefono, id } = response.data; 
+      localStorage.setItem('id', id);
+      localStorage.setItem('name', name);
+      localStorage.setItem('lastname', lastname);
+      localStorage.setItem('telefono', telefono);
       localStorage.setItem('token', token);
       localStorage.setItem('role', role);
       localStorage.setItem('username', username);

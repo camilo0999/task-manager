@@ -4,10 +4,9 @@ import apiClient from './apiClient';
 const taskService = {
   createTask: async (taskData) => {
     try {
-      console.log('taskData:', taskData);
-      // El token se agrega automáticamente por el interceptor
-      const response = await apiClient.post('/tasks', taskData);
 
+      const response = await apiClient.post('/tasks', taskData);
+      
       return response.data;
     } catch (error) {
       console.error('Error creating task:', error.response ? error.response.data : error.message);
@@ -35,6 +34,8 @@ const taskService = {
     }
   },
   updateTask: async (taskId, taskData) => {
+
+    console.log('taskData', taskData);
     try {
       const response = await apiClient.put(`/tasks/${taskId}`, taskData);
 
@@ -51,6 +52,16 @@ const taskService = {
       return response.data;
     } catch (error) {
       console.error('Error getting task:', error.response ? error.response.data : error.message);
+      throw error;
+    }
+  },
+  completeTask: async (taskId) => {
+    try {
+      const response = await apiClient.put(`/tasks/complete/${taskId}`);
+
+      return response.data;
+    } catch (error) {
+      console.error('Error completing task:', error.response ? error.response.data : error.message);
       throw error;
     }
   },

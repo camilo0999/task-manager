@@ -9,6 +9,7 @@ import NotFound from '../pages/NotFound';
 import Unauthorized from '../pages/Unauthorized';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 import GetTask from '../pages/GetTask';
+import AdminDashboardTareas from '../pages/AdminDashboardTareas';
 
 const AppRouter = () => {
   return (
@@ -16,10 +17,12 @@ const AppRouter = () => {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/admin-tareas" element={<ProtectedRoute requiredRole="admin"><AdminDashboardTareas /></ProtectedRoute>} />
       <Route path="/dashboard" element={<ProtectedRoute requiredRole="user"><Dashboard /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/get-task/:id" element={<ProtectedRoute requiredRole="user"><GetTask /></ProtectedRoute>} />
+      <Route path="/admin-get-task/:id" element={<ProtectedRoute requiredRole="admin"><GetTask /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

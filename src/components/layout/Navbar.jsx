@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Swal from 'sweetalert2';
+
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -9,11 +11,38 @@ const Navbar = () => {
   const role = localStorage.getItem("role");
 
   const handleLogout = () => {
-    // Elimina el token y el rol al cerrar sesión
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("name");
-    navigate("/login");
+    // Muestra una alerta de confirmación antes de cerrar sesión
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: "¡Cerrarás tu sesión actual!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, cerrar sesión',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Elimina el token y el rol al cerrar sesión
+        localStorage.removeItem("token");
+        localStorage.removeItem("username");
+        localStorage.removeItem("telefono");
+        localStorage.removeItem("id");
+        localStorage.removeItem("lastname");
+        localStorage.removeItem("role");
+        localStorage.removeItem("name");
+
+        // Navega a la página de inicio de sesión
+        navigate("/login");
+
+        // Muestra una alerta de éxito
+        Swal.fire(
+          '¡Sesión cerrada!',
+          'Has cerrado sesión exitosamente.',
+          'success'
+        );
+      }
+    });
   };
 
   return (
@@ -91,14 +120,7 @@ const Navbar = () => {
                     Admin Dashboard
                   </a>
                 </li>
-                <li>
-                  <a
-                    href="/admin/users"
-                    className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:dark:hover:text-blue-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700"
-                  >
-                    Manage Users
-                  </a>
-                </li>
+                
               </>
             )}
 

@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react"; // Importación de useState y useEffect
 import taskService from "../services/taskService.js";
+import "../styles/Dashboard.css";
+import Swal from 'sweetalert2';
+
 
 const Dashboard = () => {
-  const username = localStorage.getItem("username");
+  const name = localStorage.getItem("name");
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal de creación de tarea
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // Modal de actualización de tarea
   const [task, setTask] = useState({
@@ -13,8 +16,50 @@ const Dashboard = () => {
     tags: "",
     completed: false,
   });
+  const [file, setFile] = useState(null);
   const [taskToEdit, setTaskToEdit] = useState(null); // Tarea a editar
   const [tasks, setTasks] = useState([]);
+
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("title", task.title);
+    formData.append("description", task.description);
+    formData.append("dueDate", task.dueDate);
+    formData.append("priority", task.priority);
+    formData.append("tags", task.tags);
+    formData.append("completed", task.completed);
+
+    try {
+
+      const createdTask = await taskService.createTask(formData);
+      setTasks((prevTasks) => [...prevTasks, createdTask]);
+      setIsModalOpen(false);
+      Swal.fire({
+        icon: 'success',
+        title: 'Tarea creada exitosamente!',
+        showConfirmButton: false,
+        timer: 2000
+      })
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error al intentar registrar una tarea',
+      })
+      console.error(
+        
+        "Error creating task:",
+        error.response ? error.response.data : error.message
+      );
+      alert("Error al crear la tarea. Por favor, intenta nuevamente.");
+    }
+  };
 
   // Obtener las tareas al montar el componente
   useEffect(() => {
@@ -74,32 +119,6 @@ const Dashboard = () => {
     }));
   };
 
-  // Crear nueva tarea
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const newTask = {
-      title: task.title,
-      description: task.description,
-      dueDate: task.dueDate,
-      priority: task.priority,
-      tags: task.tags,
-      completed: false,
-    };
-
-    try {
-      const createdTask = await taskService.createTask(newTask);
-      setTasks((prevTasks) => [...prevTasks, createdTask]);
-      setIsModalOpen(false); // Cerrar modal
-    } catch (error) {
-      console.error(
-        "Error creating task:",
-        error.response ? error.response.data : error.message
-      );
-      alert("Error al crear la tarea. Por favor, intenta nuevamente.");
-    }
-  };
-
   // Eliminar tarea
   const handleDeleteTask = async (taskId) => {
     try {
@@ -125,7 +144,20 @@ const Dashboard = () => {
         )
       );
       setIsEditModalOpen(false); // Cerrar modal de edición
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Tarea actualizada exitosamente!',
+        showConfirmButton: false,
+        timer: 2000
+      })
+
     } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al actualizar la tarea',
+        timer: 2000
+      })
       console.error(
         "Error updating task:",
         error.response ? error.response.data : error.message
@@ -136,8 +168,8 @@ const Dashboard = () => {
   return (
     <div className="bg-gray-100 container-fluid mx-auto p-4">
       <h1 className="text-5xl font-bold text-gray-800 text-center mb-4 md:mb-8">
-        ¡Hola!, <span className="text-blue-500">{username}</span> Bienvenido a
-        Task Manager
+        ¡Hola!, <span className="text-blue-500">{name}</span> Bienvenido a Task
+        Manager
       </h1>
       <p className="text-lg mt-2 text-gray-600">
         Tienes el control total de tus tareas. Organiza, prioriza y gestiona
@@ -158,62 +190,66 @@ const Dashboard = () => {
               className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105"
               key={task.id}
             >
-              <h3 className="text-2xl font-semibold text-gray-800">
-                {task.title}
-              </h3>
-              <p> Tareas: {task.tags}</p>
-              <p className="text-gray-600">
-                Prioridad:{" "}
-                <span
-                  className={`font-bold ${
-                    task.priority === "high"
-                      ? "text-red-500"
-                      : task.priority === "medium"
-                      ? "text-yellow-500"
-                      : "text-green-500"
-                  }`}
-                >
-                  {task.priority}
-                </span>
-              </p>
-              <p className="text-gray-600">
-                Estado:{" "}
-                <span
-                  className={`font-bold ${
-                    task.completed ? "text-green-600" : "text-gray-600"
-                  }`}
-                >
-                  {task.completed ? "Completada" : "Pendiente"}
-                </span>
-              </p>
-              <p className="text-gray-600">
-                Fecha:{" "}
-                <span className="font-bold">
-                  {new Date(task.dueDate).toLocaleDateString()}
-                </span>
-              </p>
-
-              <div className="mt-6 flex justify-between items-center">
-                <a
-                  href={`/get-task/${task.id}`}
-                  className="px-4 py-2 text-blue-600 hover:text-blue-800 transition duration-300 ease-in-out"
-                >
-                  <span className="font-medium">Ver</span>
-                </a>
-
-                <button
-                  className="px-4 py-2 bg-yellow-400 text-white rounded-md hover:bg-yellow-600 transition duration-300 ease-in-out transform hover:scale-105"
-                  onClick={() => handleOpenEditModal(task)}
-                >
-                  Editar
-                </button>
-
-                <button
-                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-100 transition duration-300 ease-in-out transform hover:scale-105"
-                  onClick={() => handleDeleteTask(task.id)}
-                >
-                  Eliminar
-                </button>
+              <img
+                src={`http://localhost:5000${task.imageUrl}`}
+                alt="Task Image"
+                className="w-full h-40 object-cover rounded-t-lg"
+              />
+              <div className="p-4">
+                <h3 className="text-2xl font-semibold text-gray-800">
+                  {task.title}
+                </h3>
+                <p> Tareas: {task.tags}</p>
+                <p className="text-gray-600">
+                  Prioridad:{" "}
+                  <span
+                    className={`font-bold ${
+                      task.priority === "high"
+                        ? "text-red-500"
+                        : task.priority === "medium"
+                        ? "text-yellow-500"
+                        : "text-green-500"
+                    }`}
+                  >
+                    {task.priority}
+                  </span>
+                </p>
+                <p className="text-gray-600">
+                  Estado:{" "}
+                  <span
+                    className={`font-bold ${
+                      task.completed ? "text-green-600" : "text-gray-600"
+                    }`}
+                  >
+                    {task.completed ? "Completada" : "Pendiente"}
+                  </span>
+                </p>
+                <p className="text-gray-600">
+                  Fecha:{" "}
+                  <span className="font-bold">
+                    {new Date(task.dueDate).toLocaleDateString()}
+                  </span>
+                </p>
+                <div className="mt-6 flex justify-between items-center">
+                  <a
+                    href={`/get-task/${task.id}`}
+                    className="px-4 py-2 text-blue-600 hover:text-blue-800 transition duration-300 ease-in-out"
+                  >
+                    <span className="font-medium">Ver</span>
+                  </a>
+                  <button
+                    className="px-4 py-2 bg-yellow-400 text-white rounded-md hover:bg-yellow-600 transition duration-300 ease-in-out transform hover:scale-105"
+                    onClick={() => handleOpenEditModal(task)}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-100 transition duration-300 ease-in-out transform hover:scale-105"
+                    onClick={() => handleDeleteTask(task.id)}
+                  >
+                    Eliminar
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -222,10 +258,10 @@ const Dashboard = () => {
         {/* Modal de creación */}
         {isModalOpen && (
           <div
-            className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50"
+            className="modal fixed inset-0 flex justify-center items-center bg-black bg-opacity-70"
             onClick={handleCloseModal}
           >
-            <div className="bg-white p-6 rounded-lg shadow-md w-1/3">
+            <div className="p-6 rounded-lg shadow-lg modal-content">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold">Crear nueva tarea</h2>
                 <button
@@ -290,7 +326,10 @@ const Dashboard = () => {
                   className="w-full p-2 mt-2 border border-gray-300 rounded-md"
                   required
                 >
-                  <option value="high">Alta</option>
+                  <option value="" disabled>
+                    Selecciona una opcion
+                  </option>
+                  <option value="high">Alto</option>
                   <option value="medium">Media</option>
                   <option value="low">Baja</option>
                 </select>
@@ -308,6 +347,15 @@ const Dashboard = () => {
                   required
                 />
 
+                <input
+                  type="file"
+                  id="file"
+                  name="file"
+                  accept="image/*"
+                  className="w-full  mt-4 border border-gray-300 rounded-md"
+                  onChange={handleFileChange}
+                />
+
                 <button
                   type="submit"
                   className="w-full mt-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
@@ -322,10 +370,10 @@ const Dashboard = () => {
         {/* Modal de edición */}
         {isEditModalOpen && (
           <div
-            className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50"
+            className="modal fixed inset-0 flex justify-center items-center bg-black bg-opacity-50"
             onClick={handleCloseModal}
           >
-            <div className="bg-white p-6 rounded-lg shadow-md w-1/3">
+            <div className="p-6 rounded-lg shadow-md modal-content">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold">Actualizar tarea</h2>
                 <button
