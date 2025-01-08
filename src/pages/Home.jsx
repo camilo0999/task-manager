@@ -7,8 +7,7 @@ const Home = () => {
       <div className="banner">
         <h1>Bienvenido a ¡Task Manager!</h1>
         <p>
-          Gestiona tus tareas de manera eficiente con herramientas diseñadas
-          para facilitar tu día a día.
+        Estamos emocionados de que estés aquí para comenzar tu viaje hacia una productividad sin límites. 🚀 ¡Task Manager es la herramienta que necesitas para organizar tus proyectos, cumplir tus metas y mantener el control de tus tareas diarias con facilidad!
         </p>
         <a href="#video" className="btn-doc">Como usar la plataforma</a>
       </div>
@@ -37,7 +36,7 @@ const Home = () => {
       </div>
 
       <div className="video" id="video"> 
-        <h2>Video de Presentación</h2>
+        <h2>Introducción a TaskManager</h2>
         <p>
           Descubre todo lo que necesitas saber sobre el funcionamiento de la
           plataforma aquí.

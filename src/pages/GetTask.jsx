@@ -93,26 +93,26 @@ const GetTask = () => {
         </h1>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
           <img
-            src={`https://task-manager-api-uzzf.onrender.com${task.imageUrl}`}
+            src={task.imageUrl}
             alt="Task Image"
             className="rounded-lg shadow-md w-full h-auto"
           />
           <div>
             <div className="mb-4">
               <p className="text-gray-700 text-lg">
-                <span className="font-semibold">Description:</span>{" "}
+                <span className="font-semibold">Descripcion:</span>{" "}
                 {task.description || "No description"}
               </p>
             </div>
             <div className="mb-4">
               <p className="text-gray-700 text-lg">
-                <span className="font-semibold">Due Date:</span>{" "}
+                <span className="font-semibold">Fecha de vencimiento:</span>{" "}
                 {new Date(task.dueDate).toLocaleDateString()}
               </p>
             </div>
             <div className="mb-4">
               <p className="text-gray-700 text-lg">
-                <span className="font-semibold">Priority:</span>{" "}
+                <span className="font-semibold">Nivel de prioridad:</span>{" "}
                 <span className={getPriorityColor(task.priority)}>
                   {task.priority || "Not set"}
                 </span>
@@ -125,7 +125,7 @@ const GetTask = () => {
             </div>
             <div className="mb-6">
               <p className="text-gray-700 text-lg">
-                <span className="font-semibold">Completed:</span>{" "}
+                <span className="font-semibold">Estado:</span>{" "}
                 {task.completed ? "Si" : "No"}
               </p>
             </div>
@@ -134,7 +134,7 @@ const GetTask = () => {
                 onClick={completeTask}
                 className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded"
               >
-                Complete Task
+                Terminar tarea
               </button>
             )}
           </div>

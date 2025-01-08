@@ -1,13 +1,20 @@
-import React, { useState, useEffect } from "react"; // Importación de useState y useEffect
+import React, { useState, useEffect } from "react";
 import taskService from "../services/taskService.js";
+import Swal from "sweetalert2";
+import { subirImagen } from "../services/subirImagen.js";
 import "../styles/Dashboard.css";
-import Swal from 'sweetalert2';
-
 
 const Dashboard = () => {
   const name = localStorage.getItem("name");
-  const [isModalOpen, setIsModalOpen] = useState(false); // Modal de creación de tarea
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false); // Modal de actualización de tarea
+
+  // Estados
+  // Estados
+  const [file, setFile] = useState(null); // Guardar la URL de la imagen
+  const [isUploading, setIsUploading] = useState(false); // Estado para controlar la carga de la imagen
+  const [taskToEdit, setTaskToEdit] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [tasks, setTasks] = useState([]);
   const [task, setTask] = useState({
     title: "",
     description: "",
@@ -16,52 +23,128 @@ const Dashboard = () => {
     tags: "",
     completed: false,
   });
-  const [file, setFile] = useState(null);
-  const [taskToEdit, setTaskToEdit] = useState(null); // Tarea a editar
-  const [tasks, setTasks] = useState([]);
 
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+  const handleTaskChange = (e) => {
+    const { name, value } = e.target;
+    setTask((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleTaskSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("title", task.title);
-    formData.append("description", task.description);
-    formData.append("dueDate", task.dueDate);
-    formData.append("priority", task.priority);
-    formData.append("tags", task.tags);
-    formData.append("completed", task.completed);
-
     try {
+      // Esperar a que el archivo esté completamente cargado
+      if (!file) {
+        throw new Error("Por favor, sube una imagen antes de crear la tarea.");
+      }
 
-      const createdTask = await taskService.createTask(formData);
-      setTasks((prevTasks) => [...prevTasks, createdTask]);
+      const taskData = {
+        title: task.title,
+        description: task.description,
+        dueDate: task.dueDate,
+        priority: task.priority,
+        tags: task.tags,
+        completed: task.completed,
+        imageUrl: file, // Aquí se usa la URL del archivo subido
+      };
+
+      const response = await taskService.createTask(taskData);
+      console.log("Tarea creada:", response);
+      setTasks((prev) => [...prev, response]);
+
+      // Resetear el estado después de la creación de la tarea
+      setTask({
+        title: "",
+        description: "",
+        dueDate: "",
+        priority: "",
+        tags: "",
+        completed: false,
+      });
+      setFile(null); // Limpiar el archivo después de enviar la tarea
       setIsModalOpen(false);
-      Swal.fire({
-        icon: 'success',
-        title: 'Tarea creada exitosamente!',
-        showConfirmButton: false,
-        timer: 2000
-      })
     } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Error al intentar registrar una tarea',
-      })
-      console.error(
-        
-        "Error creating task:",
-        error.response ? error.response.data : error.message
-      );
-      alert("Error al crear la tarea. Por favor, intenta nuevamente.");
+      console.error("Error al crear tarea:", error);
+      Swal.fire("Error", error.message, "error");
     }
   };
 
-  // Obtener las tareas al montar el componente
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setTaskToEdit((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Manejo de archivo
+  const handleFileChange = async (e) => {
+    try {
+      const selectedFile = e.target.files[0];
+      if (selectedFile) {
+        // Indicar que la imagen está siendo cargada
+        setIsUploading(true);
+
+        // Esperar la URL del archivo subido
+        const uploadedFileUrl = await subirImagen(selectedFile);
+        setFile(uploadedFileUrl); // Guardar la URL en el estado
+
+        // Una vez cargada la imagen, quitar el estado de carga
+        setIsUploading(false);
+        console.log("Archivo subido:", uploadedFileUrl);
+      }
+    } catch (error) {
+      console.error("Error al subir archivo:", error);
+      Swal.fire("Error", "Hubo un problema al subir el archivo.", "error");
+      setIsUploading(false); // Asegurarse de que el estado de carga se desactive
+    }
+  };
+  // Actualizar tarea
+  const handleUpdateTask = async (e) => {
+    e.preventDefault();
+    try {
+      await taskService.updateTask(taskToEdit.id, taskToEdit);
+      setTasks((prev) =>
+        prev.map((t) => (t.id === taskToEdit.id ? { ...t, ...taskToEdit } : t))
+      );
+      setIsEditModalOpen(false);
+
+      Swal.fire({
+        icon: "success",
+        title: "Tarea actualizada exitosamente",
+        timer: 2000,
+      });
+    } catch (error) {
+      console.error(
+        "Error al actualizar tarea:",
+        error.response?.data || error.message
+      );
+      Swal.fire({
+        icon: "error",
+        title: "Error al actualizar la tarea",
+      });
+    }
+  };
+
+  // Eliminar tarea
+  const handleDeleteTask = async (taskId) => {
+    try {
+      await taskService.deleteTask(taskId);
+      setTasks((prev) => prev.filter((t) => t.id !== taskId));
+      Swal.fire({
+        icon: "success",
+        title: "Tarea eliminada exitosamente",
+        timer: 2000,
+      });
+    } catch (error) {
+      console.error(
+        "Error al eliminar tarea:",
+        error.response?.data || error.message
+      );
+      Swal.fire({
+        icon: "error",
+        title: "Error al eliminar la tarea",
+      });
+    }
+  };
+
+  // Fetch de tareas al montar el componente
   useEffect(() => {
     const fetchTasks = async () => {
       try {
@@ -69,31 +152,20 @@ const Dashboard = () => {
         setTasks(tasks);
       } catch (error) {
         console.error(
-          "Error getting tasks:",
-          error.response ? error.response.data : error.message
+          "Error al obtener tareas:",
+          error.response?.data || error.message
         );
+        Swal.fire({
+          icon: "error",
+          title: "Error al cargar tareas",
+        });
       }
     };
-
     fetchTasks();
   }, []);
 
-  // Abrir modal para crear tarea
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
-
-  // Abrir modal para editar tarea
-  const handleOpenEditModal = (task) => {
-    setTaskToEdit(task);
-    setTask({
-      ...task,
-      dueDate: task.dueDate ? task.dueDate.split("T")[0] : "", // Asegurar que la fecha sea compatible con el input
-    });
-    setIsEditModalOpen(true);
-  };
-
-  // Cerrar modal
+  // Abrir y cerrar modales
+  const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = (e) => {
     if (e.target.className === "modal") {
       setIsModalOpen(false);
@@ -101,72 +173,17 @@ const Dashboard = () => {
     }
   };
 
-  // Manejo del cambio de inputs
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setTask((prevTask) => ({
-      ...prevTask,
-      [name]: value,
-    }));
-  };
-
-  // Manejo del cambio de inputs en el modal de edición
-  const handleEditChange = (e) => {
-    const { name, value } = e.target;
-    setTaskToEdit((prevTask) => ({
-      ...prevTask,
-      [name]: value,
-    }));
-  };
-
-  // Eliminar tarea
-  const handleDeleteTask = async (taskId) => {
-    try {
-      await taskService.deleteTask(taskId);
-      setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
-    } catch (error) {
-      console.error(
-        "Error deleting task:",
-        error.response ? error.response.data : error.message
-      );
-    }
-  };
-
-  // Actualizar tarea
-  const handleUpdateTask = async (e) => {
-    e.preventDefault();
-
-    try {
-      await taskService.updateTask(taskToEdit.id, taskToEdit);
-      setTasks((prevTasks) =>
-        prevTasks.map((task) =>
-          task.id === taskToEdit.id ? { ...task, ...taskToEdit } : task
-        )
-      );
-      setIsEditModalOpen(false); // Cerrar modal de edición
-
-      Swal.fire({
-        icon: 'success',
-        title: 'Tarea actualizada exitosamente!',
-        showConfirmButton: false,
-        timer: 2000
-      })
-
-    } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error al actualizar la tarea',
-        timer: 2000
-      })
-      console.error(
-        "Error updating task:",
-        error.response ? error.response.data : error.message
-      );
-    }
+  const handleOpenEditModal = (task) => {
+    setTaskToEdit(task);
+    setTask({
+      ...task,
+      dueDate: task.dueDate?.split("T")[0] || "",
+    });
+    setIsEditModalOpen(true);
   };
 
   return (
-    <div className="bg-gray-100 container-fluid mx-auto p-4">
+    <div className="bg-gray-100 container-fluid mx-auto p-4 alto">
       <h1 className="text-5xl font-bold text-gray-800 text-center mb-4 md:mb-8">
         ¡Hola!, <span className="text-blue-500">{name}</span> Bienvenido a Task
         Manager
@@ -185,83 +202,90 @@ const Dashboard = () => {
         </button>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-          {tasks.map((task) => (
-            <div
-              className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105"
-              key={task.id}
-            >
-              <img
-                src={`https://task-manager-api-uzzf.onrender.com${task.imageUrl}`}
-                alt="Task Image"
-                className="w-full h-40 object-cover rounded-t-lg"
-              />
-              <div className="p-4">
-                <h3 className="text-2xl font-semibold text-gray-800">
-                  {task.title}
-                </h3>
-                <p> Tareas: {task.tags}</p>
-                <p className="text-gray-600">
-                  Prioridad:{" "}
-                  <span
-                    className={`font-bold ${
-                      task.priority === "high"
-                        ? "text-red-500"
-                        : task.priority === "medium"
-                        ? "text-yellow-500"
-                        : "text-green-500"
-                    }`}
-                  >
-                    {task.priority}
-                  </span>
-                </p>
-                <p className="text-gray-600">
-                  Estado:{" "}
-                  <span
-                    className={`font-bold ${
-                      task.completed ? "text-green-600" : "text-gray-600"
-                    }`}
-                  >
-                    {task.completed ? "Completada" : "Pendiente"}
-                  </span>
-                </p>
-                <p className="text-gray-600">
-                  Fecha:{" "}
-                  <span className="font-bold">
-                    {new Date(task.dueDate).toLocaleDateString()}
-                  </span>
-                </p>
-                <div className="mt-6 flex justify-between items-center">
-                  <a
-                    href={`/get-task/${task.id}`}
-                    className="px-4 py-2 text-blue-600 hover:text-blue-800 transition duration-300 ease-in-out"
-                  >
-                    <span className="font-medium">Ver</span>
-                  </a>
-                  <button
-                    className="px-4 py-2 bg-yellow-400 text-white rounded-md hover:bg-yellow-600 transition duration-300 ease-in-out transform hover:scale-105"
-                    onClick={() => handleOpenEditModal(task)}
-                  >
-                    Editar
-                  </button>
-                  <button
-                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-100 transition duration-300 ease-in-out transform hover:scale-105"
-                    onClick={() => handleDeleteTask(task.id)}
-                  >
-                    Eliminar
-                  </button>
+          {tasks.map((task) =>
+            task?.id &&
+            task?.imageUrl &&
+            task?.title &&
+            task?.tags &&
+            task?.priority &&
+            task?.dueDate !== undefined ? (
+              <div
+                className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105"
+                key={task.id}
+              >
+                <img
+                  src={task.imageUrl}
+                  alt="Task Image"
+                  className="w-full h-40 object-cover rounded-t-lg"
+                />
+                <div className="p-4">
+                  <h3 className="text-2xl font-semibold text-gray-800">
+                    {task.title}
+                  </h3>
+                  <p> Tareas: {task.tags}</p>
+                  <p className="text-gray-600">
+                    Prioridad:{" "}
+                    <span
+                      className={`font-bold ${
+                        task.priority === "high"
+                          ? "text-red-500"
+                          : task.priority === "medium"
+                          ? "text-yellow-500"
+                          : "text-green-500"
+                      }`}
+                    >
+                      {task.priority}
+                    </span>
+                  </p>
+                  <p className="text-gray-600">
+                    Estado:{" "}
+                    <span
+                      className={`font-bold ${
+                        task.completed ? "text-green-600" : "text-gray-600"
+                      }`}
+                    >
+                      {task.completed ? "Completada" : "Pendiente"}
+                    </span>
+                  </p>
+                  <p className="text-gray-600">
+                    Fecha:{" "}
+                    <span className="font-bold">
+                      {new Date(task.dueDate).toLocaleDateString()}
+                    </span>
+                  </p>
+                  <div className="mt-6 flex justify-between items-center">
+                    <a
+                      href={`/get-task/${task.id}`}
+                      className="px-4 py-2 text-blue-600 hover:text-blue-800 transition duration-300 ease-in-out"
+                    >
+                      <span className="font-medium">Ver</span>
+                    </a>
+                    <button
+                      className="px-4 py-2 bg-yellow-400 text-white rounded-md hover:bg-yellow-600 transition duration-300 ease-in-out transform hover:scale-105"
+                      onClick={() => handleOpenEditModal(task)}
+                    >
+                      Editar
+                    </button>
+                    <button
+                      className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-100 transition duration-300 ease-in-out transform hover:scale-105"
+                      onClick={() => handleDeleteTask(task.id)}
+                    >
+                      Eliminar
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ) : null
+          )}
         </div>
 
         {/* Modal de creación */}
         {isModalOpen && (
           <div
-            className="modal fixed inset-0 flex justify-center items-center bg-black bg-opacity-70"
+            className="modal"
             onClick={handleCloseModal}
           >
-            <div className="p-6 rounded-lg shadow-lg modal-content">
+            <div className="modal-content">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold">Crear nueva tarea</h2>
                 <button
@@ -271,7 +295,7 @@ const Dashboard = () => {
                   X
                 </button>
               </div>
-              <form onSubmit={handleSubmit} className="mt-4">
+              <form className="mt-4" onSubmit={handleTaskSubmit}>
                 <label htmlFor="task-title" className="block text-gray-700">
                   Título de la tarea:
                 </label>
@@ -280,7 +304,7 @@ const Dashboard = () => {
                   id="task-title"
                   name="title"
                   value={task.title}
-                  onChange={handleChange}
+                  onChange={handleTaskChange}
                   className="w-full p-2 mt-2 border border-gray-300 rounded-md"
                   required
                 />
@@ -295,7 +319,7 @@ const Dashboard = () => {
                   id="task-description"
                   name="description"
                   value={task.description}
-                  onChange={handleChange}
+                  onChange={handleTaskChange}
                   className="w-full p-2 mt-2 border border-gray-300 rounded-md"
                   required
                 ></textarea>
@@ -304,11 +328,11 @@ const Dashboard = () => {
                   Etiqueta:
                 </label>
                 <input
+                  value={task.tags}
+                  onChange={handleTaskChange}
                   type="text"
                   id="task-tag"
                   name="tags"
-                  value={task.tags}
-                  onChange={handleChange}
                   className="w-full p-2 mt-2 border border-gray-300 rounded-md"
                 />
 
@@ -321,10 +345,10 @@ const Dashboard = () => {
                 <select
                   id="task-priority"
                   name="priority"
-                  value={task.priority}
-                  onChange={handleChange}
                   className="w-full p-2 mt-2 border border-gray-300 rounded-md"
                   required
+                  value={task.priority}
+                  onChange={handleTaskChange}
                 >
                   <option value="" disabled>
                     Selecciona una opcion
@@ -341,10 +365,10 @@ const Dashboard = () => {
                   type="date"
                   id="task-date"
                   name="dueDate"
-                  value={task.dueDate}
-                  onChange={handleChange}
                   className="w-full p-2 mt-2 border border-gray-300 rounded-md"
                   required
+                  value={task.dueDate}
+                  onChange={handleTaskChange}
                 />
 
                 <input
@@ -356,11 +380,13 @@ const Dashboard = () => {
                   onChange={handleFileChange}
                 />
 
+                {/* Botón de envío deshabilitado si no se ha subido la imagen */}
                 <button
                   type="submit"
+                  disabled={isUploading || !file}
                   className="w-full mt-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
                 >
-                  Guardar tarea
+                  {isUploading ? "Cargando imagen..." : "Guardar Tarea"}
                 </button>
               </form>
             </div>

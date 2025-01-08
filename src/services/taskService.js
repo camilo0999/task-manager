@@ -5,6 +5,8 @@ const taskService = {
   createTask: async (taskData) => {
     try {
 
+      console.log('taskData', taskData);
+
       const response = await apiClient.post('/tasks', taskData);
       
       return response.data;
