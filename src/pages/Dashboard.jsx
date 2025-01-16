@@ -3,6 +3,8 @@ import taskService from "../services/taskService.js";
 import Swal from "sweetalert2";
 import { subirImagen } from "../services/subirImagen.js";
 import "../styles/Dashboard.css";
+import "../styles/HooksMessage.css";
+import useLoading from "../hooks/useLoading";
 
 const Dashboard = () => {
   const name = localStorage.getItem("name");
@@ -23,6 +25,7 @@ const Dashboard = () => {
     tags: "",
     completed: false,
   });
+  const { isLoading, loadingMessage, showLoading, hideLoading } = useLoading();
 
   const handleTaskChange = (e) => {
     const { name, value } = e.target;
@@ -144,25 +147,21 @@ const Dashboard = () => {
     }
   };
 
-  // Fetch de tareas al montar el componente
   useEffect(() => {
     const fetchTasks = async () => {
       try {
+        showLoading("Cargando tareas...");
         const tasks = await taskService.getTasks();
         setTasks(tasks);
       } catch (error) {
-        console.error(
-          "Error al obtener tareas:",
-          error.response?.data || error.message
-        );
-        Swal.fire({
-          icon: "error",
-          title: "Error al cargar tareas",
-        });
+        console.error("Error al cargar las tareas:", error);
+      } finally {
+        hideLoading();
       }
     };
+
     fetchTasks();
-  }, []);
+  }, [showLoading, hideLoading]);
 
   // Abrir y cerrar modales
   const handleOpenModal = () => setIsModalOpen(true);
@@ -183,7 +182,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="bg-gray-100 container-fluid mx-auto p-4 alto">
+    <div className="home bg-gray-100 container-fluid mx-auto p-4 alto">
       <h1 className="text-5xl font-bold text-gray-800 text-center mb-4 md:mb-8">
         ¡Hola!, <span className="text-blue-500">{name}</span> Bienvenido a Task
         Manager
@@ -212,66 +211,72 @@ const Dashboard = () => {
               <div
                 className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105"
                 key={task.id}
+                style={{ height: "100%" }}
               >
-                <img
-                  src={task.imageUrl}
-                  alt="Task Image"
-                  className="w-full h-40 object-cover rounded-t-lg"
-                />
-                <div className="p-4">
-                  <h3 className="text-2xl font-semibold text-gray-800">
-                    {task.title}
-                  </h3>
-                  <p> Tareas: {task.tags}</p>
-                  <p className="text-gray-600">
-                    Prioridad:{" "}
-                    <span
-                      className={`font-bold ${
-                        task.priority === "high"
-                          ? "text-red-500"
-                          : task.priority === "medium"
-                          ? "text-yellow-500"
-                          : "text-green-500"
-                      }`}
-                    >
-                      {task.priority}
-                    </span>
-                  </p>
-                  <p className="text-gray-600">
-                    Estado:{" "}
-                    <span
-                      className={`font-bold ${
-                        task.completed ? "text-green-600" : "text-gray-600"
-                      }`}
-                    >
-                      {task.completed ? "Completada" : "Pendiente"}
-                    </span>
-                  </p>
-                  <p className="text-gray-600">
-                    Fecha:{" "}
-                    <span className="font-bold">
-                      {new Date(task.dueDate).toLocaleDateString()}
-                    </span>
-                  </p>
-                  <div className="mt-6 flex justify-between items-center">
-                    <a
-                      href={`/get-task/${task.id}`}
-                      className="px-4 py-2 text-blue-600 hover:text-blue-800 transition duration-300 ease-in-out"
-                    >
-                      <span className="font-medium">Ver</span>
-                    </a>
-                    <button
-                      className="px-4 py-2 bg-yellow-400 text-white rounded-md hover:bg-yellow-600 transition duration-300 ease-in-out transform hover:scale-105"
-                      onClick={() => handleOpenEditModal(task)}
-                    >
-                      Editar
-                    </button>
-                    <button
-                      className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-100 transition duration-300 ease-in-out transform hover:scale-105"
-                      onClick={() => handleDeleteTask(task.id)}
-                    >
-                      Eliminar
-                    </button>
+                <div className="flex flex-col h-full">
+                  <img
+                    src={task.imageUrl}
+                    alt="Task Image"
+                    className="w-full h-40 object-cover rounded-t-lg"
+                    style={{ objectFit: "cover" }}
+                  />
+                  <div className="p-4 flex-grow flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-2xl font-semibold text-gray-800">
+                        {task.title}
+                      </h3>
+                      <p> Tareas: {task.tags}</p>
+                      <p className="text-gray-600">
+                        Prioridad:{" "}
+                        <span
+                          className={`font-bold ${
+                            task.priority === "high"
+                              ? "text-red-500"
+                              : task.priority === "medium"
+                              ? "text-yellow-500"
+                              : "text-green-500"
+                          }`}
+                        >
+                          {task.priority}
+                        </span>
+                      </p>
+                      <p className="text-gray-600">
+                        Estado:{" "}
+                        <span
+                          className={`font-bold ${
+                            task.completed ? "text-green-600" : "text-gray-600"
+                          }`}
+                        >
+                          {task.completed ? "Completada" : "Pendiente"}
+                        </span>
+                      </p>
+                      <p className="text-gray-600">
+                        Fecha:{" "}
+                        <span className="font-bold">
+                          {new Date(task.dueDate).toLocaleDateString()}
+                        </span>
+                      </p>
+                    </div>
+                    <div className="mt-6 flex justify-between items-center">
+                      <a
+                        href={`/get-task/${task.id}`}
+                        className="px-4 py-2 text-blue-600 hover:text-blue-800 transition duration-300 ease-in-out"
+                      >
+                        <span className="font-medium">Ver</span>
+                      </a>
+                      <button
+                        className="px-4 py-2 bg-yellow-400 text-white rounded-md hover:bg-yellow-600 transition duration-300 ease-in-out transform hover:scale-105"
+                        onClick={() => handleOpenEditModal(task)}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-100 transition duration-300 ease-in-out transform hover:scale-105"
+                        onClick={() => handleDeleteTask(task.id)}
+                      >
+                        Eliminar
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -281,10 +286,7 @@ const Dashboard = () => {
 
         {/* Modal de creación */}
         {isModalOpen && (
-          <div
-            className="modal"
-            onClick={handleCloseModal}
-          >
+          <div className="modal" onClick={handleCloseModal}>
             <div className="modal-content">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold">Crear nueva tarea</h2>

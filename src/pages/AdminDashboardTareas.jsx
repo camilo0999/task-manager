@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import taskService from "../services/adminService";
+import '../styles/AdminDashboard.css';
 
 const Sidebar = ({ active }) => {
   return (
@@ -28,7 +29,6 @@ const Sidebar = ({ active }) => {
     </div>
   );
 };
-
 const Card = ({ title, value, color }) => {
   return (
     <div className="bg-white p-6 rounded-lg shadow-md w-full sm:w-64 lg:w-80">
@@ -125,7 +125,7 @@ const AdminDashboardTareas = () => {
   }, []);
 
   return (
-    <div className="flex h-screen">
+    <div className="flex AdminDashboard">
       <Sidebar active="usuarios" />
 
       <div className="flex-1 p-6 bg-gray-100 overflow-auto">

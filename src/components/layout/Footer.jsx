@@ -1,9 +1,10 @@
 // src/components/Footer.jsx
 import React from 'react';
+import '../../styles/Footer.css';
 
 const Footer = () => {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="footer flex flex-col min-h-screen">
       <div className="flex-grow">
         {/* Aquí va el contenido principal de la página */}
       </div>

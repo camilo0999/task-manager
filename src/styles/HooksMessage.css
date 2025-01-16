@@ -1,0 +1,10 @@
+.loading-message {
+    font-size: 1.2em;
+    text-align: center;
+    color: #555;
+    margin-top: 20px;
+    background-color: #e2e6ea;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #d6d8db;
+}

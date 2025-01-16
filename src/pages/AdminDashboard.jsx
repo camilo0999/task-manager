@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import adminService from "../services/adminService";
 import Swal from "sweetalert2";
+import '../styles/AdminDashboard.css';
 
 const handleBlockUser = async (userId) => {
   try {
@@ -210,7 +211,7 @@ const AdminDashboard = () => {
   }, []);
 
   return (
-    <div className="flex">
+    <div className="flex AdminDashboard">
       <Sidebar active="usuarios" />
 
       <div className="flex-1 p-6 bg-gray-100 overflow-auto">
@@ -240,7 +241,7 @@ const AdminDashboard = () => {
           />
         </div>
 
-        <div className="bg-white p-4 rounded-lg shadow overflow-x-auto w-full">
+        <div className="">
           <Table data={data} />
         </div>
       </div>

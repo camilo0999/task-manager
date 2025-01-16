@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import "../styles/RegisterPage.css";
 import authService from "../services/authService";
 import Swal from 'sweetalert2';
+import useLoadingRegister from '../hooks/useLoadingRegister';
+import "../styles/HooksMessage.css";
 
 const RegisterPage = () => {
   const [username, setUsername] = useState("");
@@ -11,9 +13,11 @@ const RegisterPage = () => {
   const [telefono, setTelefono] = useState("");
   const blockaded = false;
   const role = "user";
+  const { loading, startLoading, stopLoading } = useLoadingRegister();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    startLoading();
     const userData = { username, password, role, name, lastname, telefono, blockaded };
     try {
       const response = await authService.register(userData);
@@ -49,12 +53,15 @@ const RegisterPage = () => {
         "Error registrando usuario:",
         error.response ? error.response.data : error.message
       );
+    } finally {
+      stopLoading();
     }
   };
 
   return (
     <div className="register-container">
       <h1>Regístrate en Task Manager</h1>
+      {loading && <div className="loading-message">Cargando...</div>}
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="name">Nombre</label>
@@ -121,7 +128,7 @@ const RegisterPage = () => {
             />
           </div>
         </div>
-        <button type="submit" className="btn">
+        <button type="submit" className="btn" disabled={loading}>
           Registrar
         </button>
       </form>

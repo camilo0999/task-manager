@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import taskService from "../services/taskService";
 import Swal from "sweetalert2";
+import '../styles/GetTask.css';
 
 const GetTask = () => {
   const [task, setTask] = useState(null);
